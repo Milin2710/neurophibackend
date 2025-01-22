@@ -11,9 +11,9 @@ const nodemailer = require("nodemailer");
 const path = require("path");
 dotenv.config();
 const app = express();
-// app.use(express.static(path.join(__dirname, "../build")));
+app.use(express.static(path.join(__dirname, "../build")));
 // Middleware
-app.use(cors({ origin: "https://neurophi.tech", credentials: true }));
+app.use(cors({ origin: "https://neurophi.tech/api", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("combined")); // Logging
@@ -51,7 +51,7 @@ const contactUsSchema = new mongoose.Schema(
 const Contactus = mongoose.model("Contactus", contactUsSchema);
 
 // Signup
-app.post("/api/signup", async (req, res) => {
+app.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -128,7 +128,7 @@ app.post("/api/signup", async (req, res) => {
 });
 
 // Verify OTP Route
-app.post("/api/verify-otp", async (req, res) => {
+app.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
 
   try {
@@ -163,7 +163,7 @@ app.post("/api/verify-otp", async (req, res) => {
 });
 
 // Login
-app.post("/api/login", async (req, res, next) => {
+app.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -210,7 +210,7 @@ app.post("/api/login", async (req, res, next) => {
 });
 
 // Contact
-app.post("/api/contact", async (req, res, next) => {
+app.post("/contact", async (req, res, next) => {
   try {
     const { name, email, company, message } = req.body;
 
@@ -228,7 +228,7 @@ app.post("/api/contact", async (req, res, next) => {
 });
 
 // Send OTP
-app.post("/api/sendotp", async (req, res) => {
+app.post("/sendotp", async (req, res) => {
   const { email } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -262,7 +262,7 @@ app.post("/api/sendotp", async (req, res) => {
   }
 });
 
-app.post("/api/resetpassword", async (req, res) => {
+app.post("/resetpassword", async (req, res) => {
   const { email, otp, newPassword } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -285,7 +285,7 @@ app.post("/api/resetpassword", async (req, res) => {
   }
 });
 
-app.post("/api/islogin", async (req, res) => {
+app.post("/islogin", async (req, res) => {
   const { neurophilogin } = req.cookies;
   if (!neurophilogin) return res.status(401).json("something went wrong");
   jwt.verify(neurophilogin, process.env.JWT_SECRET, (err, info) => {
@@ -297,8 +297,12 @@ app.post("/api/islogin", async (req, res) => {
   });
 });
 
-app.post("/api/logout", (req, res) => {
+app.post("/logout", (req, res) => {
   res.cookie("neurophilogin", "").json("Logged out");
+});
+
+app.get('/api/test', (req, res) => {
+    res.status(200).send('Backend is working!');
 });
 
 // Global error handler
@@ -307,15 +311,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, "../build/index.html"));
-// });
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../build/index.html"));
+});
 
-// // Your error handler and port configuration remain the same
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).json({ error: "Internal server error" });
-// });
+// Your error handler and port configuration remain the same
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Internal server error" });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
