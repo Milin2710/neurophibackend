@@ -1,20 +1,8 @@
 const express = require("express");
-const serverless = require("serverless-http");
-const path = require("path");
-
 const app = express();
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "../build")));
+app.get("/", (req, res) => res.send("Congratulation 🎉🎉! Our Express server is Running on Vercel"));
 
-// Your routes here
-app.get("/api/test", (req, res) => {
-  res.status(200).json({ message: "Backend is working!" });
-});
+app.listen(3000, () => console.log("Server ready on port 3000."));
 
-// Catch-all handler to serve frontend
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../build/index.html"));
-});
-
-module.exports.handler = serverless(app);
+module.exports = app;
